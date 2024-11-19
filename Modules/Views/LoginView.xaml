@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CSC317PassManagerP2Starter.Modules.Views.LoginView"
+             Title="LoginView">
+    <VerticalStackLayout>
+        <Label 
+            Text="Welcome to Password Manager"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            Margin="0, 80, 0, 50"
+            FontSize="35"/>
+
+        <Label Text="Placeholder for Error Message" HorizontalOptions="Center"
+               TextColor="#FF6565" x:Name="lblError" IsVisible="False"/>
+
+
+        <Border Margin="0, 10, 0, 0" WidthRequest="400" StrokeThickness="0" 
+                StrokeShape="RoundRectangle 5"
+                BackgroundColor="{AppThemeBinding Light={StaticResource LoginFrameBGColorLight}, Dark={StaticResource LoginFrameBGColorDark}}">
+
+            <VerticalStackLayout Padding="25" >
+                <Entry Placeholder="Username" WidthRequest="300" Margin="0, 20, 0, 0" x:Name="txtUserName"/>
+                <Entry Placeholder="Password" WidthRequest="300" Margin="0, 20, 0, 0" x:Name="txtPassword" 
+                       IsPassword="True"/>
+                <Button Text="Sign In" WidthRequest="300" Margin="0, 50, 0, 0" Clicked="ProcessLogin"/>
+            </VerticalStackLayout>
+        </Border>
+
+    </VerticalStackLayout>
+</ContentPage>
