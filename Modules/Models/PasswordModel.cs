@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSC317PassManagerP2Starter.Modules.Controllers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,11 @@ namespace CSC317PassManagerP2Starter.Modules.Models
 {
     public class PasswordModel
     {
-       //Implement the Password Model here.
+        public int ID { get; set; }
+        public string UserId { get; set; } = "";
+        public string PlatformName { get; set; } = "";
+
+        public byte[]? PasswordText;
 
     }
 }

@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using CSC317PassManagerP2Starter.Modules.Controllers;
 using CSC317PassManagerP2Starter.Modules.Models;
 
-
-
-/* This module contains the class definition for Password Row.
- * 
- * The methods are missing their bodies.  Fill in the method definitions below.
- * 
- */
 namespace CSC317PassManagerP2Starter.Modules.Views
 {
     public class PasswordRow : BindableObject, INotifyPropertyChanged
@@ -21,40 +10,42 @@ namespace CSC317PassManagerP2Starter.Modules.Views
         private bool _isVisible = false;
         private bool _editing = false;
 
-        public PasswordRow(PasswordModel source)
-        {
+        public PasswordRow(PasswordModel source) 
+        { 
             _pass = source;
+            loadPassData();
         }
 
-        //Create your Binding Properties here, which should reflect the front-end bindings.
-        //See the example of "Platform" below.
+        // like the password, changes to platform and user name shoudn't be stored until save is pressed
+        private string temp_platform;
+        private string temp_userName;
+        private string temp_pass;
+
+        private void loadPassData()
+        {
+            temp_platform = _pass.PlatformName;
+            temp_userName = _pass.UserId;
+
+            User? curr_user = LoginController.CurrentUser;
+            temp_pass = PasswordCrypto.Decrypt(_pass.PasswordText, Tuple.Create(curr_user.Key, curr_user.IV));
+        }
+
         public string Platform
         {
-            get
-            {
-                //complete getter for Platform.  currenly returns an empty string. 
-                return "";
-            }
+            get { return temp_platform; }
             set
             {
-                //complete setter for Platform.
-
-                //This needs to be called for updating the binding when
-                //the platform name is edited.  Leave here.
+                temp_platform = value;
                 RefreshRow();
             }
         }
 
         public string PlatformUserName
         {
-            get
-            {
-                //Complete getter for User Name.
-                return "";
-            }
+            get { return temp_userName; }
             set
             {
-                //complete setter for User Name.
+                temp_userName = value;
                 RefreshRow();
             }
         }
@@ -63,67 +54,47 @@ namespace CSC317PassManagerP2Starter.Modules.Views
         {
             get
             {
-               //complete getter for Password.  Currenly returns "hidden."
-               //This should return the actual password is the Show toggle
-               //is true.
-               //note that the password should be decrypted using the user's
-               //encryption key before being shown.
-               return "<hidden>";
+                // decryption moved to utility function loadPassData()
+                if (_isVisible) return temp_pass;
+                return "<hidden>";
             }
             set
             {
-                //complete setter for password.  Note that this ONLY changes the password
-                //stored in the row.  The password should not be committed to the model
-                //data until save is clicked.
-
-
+                // Note that this ONLY changes the password stored in the row.
+                // The password should not be committed to the model data until save is clicked.
+                
+                // due to the above constraint, encrption has been moved to SavePassword()
+                temp_pass = value;
                 RefreshRow();
             }
         }
 
-        public int PasswordID
-        {
-            get
-            {
-                //complete getter for the pass ID.  Is binded to the edit/save/copy/delete buttons.
-                //currently returns -1;
-                return -1;
-            }
-        }
+        public int PasswordID { get { return _pass.ID; } }
 
         public bool IsShown
         {
-            get
-            {
-                //complete getter for IsShown, which is binded to the Show Password
-                //toggle/switch.
-                return false;
-            }
+            get { return _isVisible; }
             set
             {
-                //complete setter for IsShown.
+                _isVisible = value;
                 RefreshRow();
             }
         }
 
         public bool Editing
         {
-            get
-            {
-                //Complete getter for Editing, which is toggled when the "edit/save" button
-                //is clicked.  
-                return false;
-            }
+            get { return _editing; }
             set
             {
-                //Complete setter for Editing.
+                _editing = value;
+
+                // if editing mode is left, revert changes to default
+                if (_editing == false) loadPassData();
+
                 RefreshRow();
             }
         }
 
-
-        //This is called when a bound property is changed on the front-end.  Causes the 
-        //front-end to update the collection view.
         private void RefreshRow()
         {
             OnPropertyChanged(nameof(Platform));
@@ -133,11 +104,18 @@ namespace CSC317PassManagerP2Starter.Modules.Views
             OnPropertyChanged(nameof(Editing));
         }
 
-        public void SavePassword()
-        {
-            //Is called when the "save" button is clicked.  Saves the changes to the
-            //password to the model data.
+        // called when save is pressed 
+        public void SavePassword() {
+            User? curr_user = LoginController.CurrentUser;
+            
+            PasswordController.UpdatePassword(new PasswordModel 
+            { 
+                ID = _pass.ID,
+                PlatformName = temp_platform,
+                UserId = temp_userName,
+                // encrypt pass for storage
+                PasswordText = PasswordCrypto.Encrypt(temp_pass, Tuple.Create(curr_user.Key, curr_user.IV))
+            }); 
         }
     }
-
 }
