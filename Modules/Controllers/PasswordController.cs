@@ -28,21 +28,20 @@ namespace CSC317PassManagerP2Starter.Modules.Controllers
         public void AddPassword(string platform, string username, string password)
         {
             User? curr_user = LoginController.CurrentUser;
-            PasswordModel temp = new PasswordModel
+
+            _passwords.Add(new PasswordModel
             {
                 ID = curr_ID++, // store current ID value then increment (postfix behavior)
                 PlatformName = platform,
                 UserId = username,
                 PasswordText = PasswordCrypto.Encrypt(password, Tuple.Create(curr_user.Key, curr_user.IV))
-            };
-
-            display_ref.Add(new PasswordRow(temp)); // update observable collection to populate changes to front end
-            _passwords.Add(temp); // also add to _passwords for update and get functions
+            });
             
             counter++;
         }
 
-        public PasswordModel? GetPassword(int ID)
+        // changed to static
+        public static PasswordModel? GetPassword(int ID)
         {
             foreach (PasswordModel pass in _passwords)
             {
@@ -54,16 +53,14 @@ namespace CSC317PassManagerP2Starter.Modules.Controllers
 
         public static bool UpdatePassword(PasswordModel changes)
         {
-            foreach (PasswordModel pass in _passwords)
+            PasswordModel pass = GetPassword(changes.ID);
+            if (pass is not null)
             {
-                if (pass.ID == changes.ID)
-                {
-                    pass.PlatformName = changes.PlatformName;
-                    pass.UserId = changes.UserId;
-                    pass.PasswordText = changes.PasswordText;
-                    
-                    return true;
-                }
+                pass.PlatformName = changes.PlatformName;
+                pass.UserId = changes.UserId;
+                pass.PasswordText = changes.PasswordText;
+
+                return true;
             }
 
             return false;
@@ -71,18 +68,14 @@ namespace CSC317PassManagerP2Starter.Modules.Controllers
 
         public bool RemovePassword(int ID)
         {
-            for (int i = 0; i < counter; i++)
+            PasswordModel pass = GetPassword(ID);
+            if (pass is not null)
             {
-                if (display_ref[i].PasswordID == ID)
-                {
-                    display_ref.RemoveAt(counter); // remove from observable collection to update front end
-                    _passwords.RemoveAt(counter); // remove from password list as well
-                    counter--; // decrement counter for removed value
-                    
-                    return true;
-                }
+                _passwords.Remove(pass);
+                return true;
             }
 
+            counter--;
             return false;
         }
 
