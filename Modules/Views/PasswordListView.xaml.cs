@@ -53,14 +53,12 @@ public partial class PasswordListView : ContentPage
             {
                 if (!pass.Editing) // password in editing mode
                 {
-                    (sender as Button).Text = "Save";
                     pass.Editing = true;
                 }
                 else // password not in editing mode
                 {
                     pass.SavePassword();
                     pass.Editing = false;
-                    (sender as Button).Text = "Edit";
                 }
             }
         }
@@ -74,15 +72,18 @@ public partial class PasswordListView : ContentPage
         {
             if (pass.PasswordID == ID)
             {
+                
                 _rows.Remove(pass);
-                App.PasswordController.RemovePassword(ID);
+                break;
             }
         }
+
+        App.PasswordController.RemovePassword(ID);
     }
 
     private void ButtonAddPassword(object sender, EventArgs e)
     {
         //Called when Add Password is clicked.  
-        App.Current.MainPage = new Modules.Views.AddPasswordView();
+        App.Current.MainPage = new AddPasswordView();
     }
 }

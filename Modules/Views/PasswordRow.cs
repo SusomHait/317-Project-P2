@@ -13,26 +13,21 @@ namespace CSC317PassManagerP2Starter.Modules.Views
         public PasswordRow(PasswordModel source) 
         { 
             _pass = source;
-            loadPassData();
         }
 
         // like the password, changes to platform and user name shoudn't be stored until save is pressed
-        private string temp_platform;
-        private string temp_userName;
-        private string temp_pass;
-
-        private void loadPassData()
-        {
-            temp_platform = _pass.PlatformName;
-            temp_userName = _pass.UserId;
-
-            User? curr_user = LoginController.CurrentUser;
-            temp_pass = PasswordCrypto.Decrypt(_pass.PasswordText, Tuple.Create(curr_user.Key, curr_user.IV));
-        }
+        private string temp_platform, temp_userName, temp_pass;
 
         public string Platform
         {
-            get { return temp_platform; }
+            get 
+            {
+                if (!_editing)
+                {
+                    temp_platform = _pass.PlatformName;
+                }
+                return temp_platform;
+            }
             set
             {
                 temp_platform = value;
@@ -42,7 +37,14 @@ namespace CSC317PassManagerP2Starter.Modules.Views
 
         public string PlatformUserName
         {
-            get { return temp_userName; }
+            get 
+            {
+                if (!_editing)
+                {
+                    temp_userName = _pass.UserId;
+                }
+                return temp_userName;
+            }
             set
             {
                 temp_userName = value;
@@ -54,8 +56,15 @@ namespace CSC317PassManagerP2Starter.Modules.Views
         {
             get
             {
-                // decryption moved to utility function loadPassData()
-                if (_isVisible) return temp_pass;
+                if (_isVisible)
+                {
+                    if (!_editing)
+                    {
+                        User? curr_user = LoginController.CurrentUser;
+                        temp_pass = PasswordCrypto.Decrypt(_pass.PasswordText, Tuple.Create(curr_user.Key, curr_user.IV));
+                    }
+                    return temp_pass;
+                }
                 return "<hidden>";
             }
             set
@@ -77,6 +86,13 @@ namespace CSC317PassManagerP2Starter.Modules.Views
             set
             {
                 _isVisible = value;
+                
+                // change editing stage when visibility set false
+                if (!_isVisible)
+                {
+                    _editing = false;
+                }
+
                 RefreshRow();
             }
         }
@@ -87,11 +103,18 @@ namespace CSC317PassManagerP2Starter.Modules.Views
             set
             {
                 _editing = value;
-
-                // if editing mode is left, revert changes to default
-                if (_editing == false) loadPassData();
-
                 RefreshRow();
+            }
+        }
+
+        // added an extra parameter to change save button label
+        // needed to fix display bug (caused when search is used while password editing is active)
+        public string edit_save_label
+        {
+            get 
+            {
+                if (_editing) return "Save";
+                else return "Edit";
             }
         }
 
@@ -102,14 +125,17 @@ namespace CSC317PassManagerP2Starter.Modules.Views
             OnPropertyChanged(nameof(PlatformPassword));
             OnPropertyChanged(nameof(IsShown));
             OnPropertyChanged(nameof(Editing));
+
+            // added extra parameter edit_save_lable
+            OnPropertyChanged(nameof(edit_save_label));
         }
 
         // called when save is pressed 
         public void SavePassword() {
             User? curr_user = LoginController.CurrentUser;
-            
-            PasswordController.UpdatePassword(new PasswordModel 
-            { 
+
+            PasswordController.UpdatePassword(new PasswordModel
+            {
                 ID = _pass.ID,
                 PlatformName = temp_platform,
                 UserId = temp_userName,

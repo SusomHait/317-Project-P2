@@ -8,20 +8,25 @@ namespace CSC317PassManagerP2Starter.Modules.Controllers
     {
         public static List<PasswordModel> _passwords = new List<PasswordModel>(); // made static
         private int counter = 0; // changed start to 0
-        
-        // added more variables
         private int curr_ID = 1; // keep a separate counter for ID
-        private ObservableCollection<PasswordRow>? display_ref;
 
 
         public void PopulatePasswordView(ObservableCollection<PasswordRow> source, string search_criteria = "")
         {
+            source.Clear();
+
             foreach (PasswordModel pass in _passwords) 
             { 
+                // check for filter
+                if (search_criteria.Length > 0)
+                {
+                    if (!pass.PlatformName.ToLower().Contains(search_criteria) && !pass.UserId.ToLower().Contains(search_criteria))
+                    {
+                        continue;
+                    }
+                }
                 source.Add(new PasswordRow(pass)); 
             }
-            
-            display_ref = source;
         }
 
         //CRUD operations for the password list.
@@ -79,12 +84,21 @@ namespace CSC317PassManagerP2Starter.Modules.Controllers
             return false;
         }
 
+        // track if dummy data has been added to main list
+        // needed to prevent dummy data duplication on page reload
+        bool addedTestPasswords = false;
         public void GenTestPasswords()
         {
-            AddPassword("Google", "test@gmail.com", "1234");
-            AddPassword("Facebook", "temp_user", "2345");
-            AddPassword("Amazon", "frequentbuyer", "bezos1964");
-            AddPassword("Apply", "fruit", "jobs21");
+            // add dummy data to main password list once
+            if (!addedTestPasswords)
+            {
+                AddPassword("Google", "test@gmail.com", "1234");
+                AddPassword("Facebook", "temp_user", "2345");
+                AddPassword("Amazon", "frequentbuyer", "bezos1964");
+                AddPassword("Apple", "fruit", "jobs21");
+
+                addedTestPasswords = true;
+            }
         }
     }
 }

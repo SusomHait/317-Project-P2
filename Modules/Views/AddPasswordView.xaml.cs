@@ -27,7 +27,7 @@ public partial class AddPasswordView : ContentPage
     {
         //Called when the Submit button is clicked for a password manually entered.
         string platform = txtNewPlatform.Text;
-        string user_name = txtNewPlatform.Text;
+        string user_name = txtNewUserName.Text;
         string password = txtNewPassword.Text;
         string verify = txtNewPasswordVerify.Text;
 
@@ -70,7 +70,7 @@ public partial class AddPasswordView : ContentPage
     {
         //Called when the submit button for a Generated password is clicked.
         string platform = txtNewPlatform.Text;
-        string user_name = txtNewPlatform.Text;
+        string user_name = txtNewUserName.Text;
 
         if (platform == null || platform.Length == 0)
         {
